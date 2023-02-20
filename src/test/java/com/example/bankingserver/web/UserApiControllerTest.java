@@ -1,6 +1,7 @@
 package com.example.bankingserver.web;
 
 import com.example.bankingserver.domain.Friendship;
+import com.example.bankingserver.domain.FriendshipRepository;
 import com.example.bankingserver.domain.UserRepository;
 import com.example.bankingserver.domain.Users;
 import com.example.bankingserver.web.dto.UserDto;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
@@ -22,7 +24,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Transactional
@@ -34,6 +38,9 @@ class UserApiControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private FriendshipRepository friendshipRepository;
 
     @Autowired
     private WebApplicationContext context;
@@ -176,6 +183,39 @@ class UserApiControllerTest {
         // then
         List<Friendship> friendshipList = userRepository.findById(user1.getId()).get().getFriendshipList();
         assertThat(friendshipList.size()).isEqualTo(1);
+
+    }
+
+    @Test
+    public void 친구목록조회_ApiTest_성공() throws Exception {
+
+        // given
+        Users user1 = userRepository.save(new Users("test1", "1234"));
+        Users user2 = userRepository.save(new Users("test2", "1234"));
+        Users user3 = userRepository.save(new Users("test3", "1234"));
+
+        friendshipRepository.save(new Friendship(user1, user2));
+        friendshipRepository.save(new Friendship(user1, user3));
+
+        String url = "http://localhost:" + port + "/user/" + user1.getId() + "/friend";
+
+        // when, then
+        mvc.perform(get(url))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].username").value("test2"))
+                .andExpect(jsonPath("$[1].username").value("test3"));
+
+    }
+
+    @Test
+    public void 친구목록조회_ApiTest_실패_존재하지않는사용자조회() throws Exception {
+
+        // given
+        String url = "http://localhost:" + port + "/user/2/friend";
+
+        // when, then
+        mvc.perform(get(url))
+                .andExpect(status().is4xxClientError());
 
     }
 }
