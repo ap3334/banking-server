@@ -30,9 +30,7 @@ public class FriendshipService {
                 .friend(friend)
                 .build();
 
-        friendshipRepository.save(friendship);
-
-        return friend.getId();
+        return friendshipRepository.save(friendship).getId();
     }
 
 }
