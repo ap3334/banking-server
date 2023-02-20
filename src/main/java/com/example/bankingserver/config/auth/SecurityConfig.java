@@ -22,7 +22,7 @@ public class SecurityConfig {
                 .headers().frameOptions().disable()
                 .and()
                 .authorizeHttpRequests()
-                .requestMatchers("/*").permitAll();
+                .requestMatchers("/**").permitAll();
 
 
         return http.build();
