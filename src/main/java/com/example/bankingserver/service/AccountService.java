@@ -21,9 +21,9 @@ public class AccountService {
 
     public int transferAccount(Long senderAccountId, Long recipientAccountId, int amount) {
 
-        Account senderAccount = accountRepository.findByUserId(senderAccountId)
+        Account senderAccount = accountRepository.findByUserIdWithPessimisticLock(senderAccountId)
                 .orElseThrow(() -> new UsernameNotFoundException("해당 발신자의 계좌는 존재하지 않습니다."));
-        Account recipientAccount = accountRepository.findByUserId(recipientAccountId)
+        Account recipientAccount = accountRepository.findByUserIdWithPessimisticLock(recipientAccountId)
                 .orElseThrow(() -> new UsernameNotFoundException("해당 수신자의 계좌는 존재하지 않습니다."));
 
         if (senderAccount.getBalance() < amount) {
