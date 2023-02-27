@@ -64,4 +64,23 @@ class AccountServiceTest {
 
     }
 
+    @Test
+    public void 계좌조회() throws Exception {
+
+        // given
+        Users user = new Users("user", "1234");
+        userRepository.save(user);
+
+        Account account = new Account(user, 20000);
+        accountRepository.save(account);
+
+        // when
+        int balance = accountService.searchAccount(account.getId());
+
+        // then
+        assertThat(balance).isEqualTo(20000);
+
+
+    }
+
 }
