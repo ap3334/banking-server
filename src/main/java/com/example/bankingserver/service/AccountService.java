@@ -57,7 +57,7 @@ public class AccountService {
     @Transactional(readOnly = true)
     public int searchAccount(Long accountId) {
 
-        Account account = accountRepository.findById(accountId).orElseThrow(() -> new IllegalArgumentException("해당 계좌는 존재하지 않습니다."));
+        Account account = accountRepository.findById(accountId).orElseThrow(() -> new AccountNotFoundException("해당 계좌는 존재하지 않습니다."));
 
         return account.getBalance();
     }
