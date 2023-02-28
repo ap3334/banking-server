@@ -33,4 +33,8 @@ public class FriendshipService {
         return friendshipRepository.save(friendship).getId();
     }
 
+    public boolean checkFriendship(Long senderId, Long recipientId) {
+
+        return friendshipRepository.findByUserIdAndFriendId(senderId, recipientId).isPresent();
+    }
 }
