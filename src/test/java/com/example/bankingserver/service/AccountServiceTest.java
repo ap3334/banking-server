@@ -7,6 +7,7 @@ import com.example.bankingserver.domain.Users;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -44,12 +45,12 @@ class AccountServiceTest {
 
         // when
         service.execute(() -> {
-            accountService.transferAccount(userA.getId(), userB.getId(), 1000);
+            accountService.transferAccount(accountA.getId(), accountB.getId(), 1000);
             latch.countDown();
         });
 
         service.execute(() -> {
-            accountService.transferAccount(userA.getId(), userB.getId(), 2000);
+            accountService.transferAccount(accountA.getId(), accountB.getId(), 2000);
             latch.countDown();
         });
 
