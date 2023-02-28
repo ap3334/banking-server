@@ -4,6 +4,7 @@ import com.example.bankingserver.domain.Account;
 import com.example.bankingserver.domain.AccountRepository;
 import com.example.bankingserver.domain.Transaction;
 import com.example.bankingserver.domain.TransactionRepository;
+import com.example.bankingserver.exception.AccountNotFoundException;
 import com.example.bankingserver.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,9 +22,9 @@ public class AccountService {
     public int transferAccount(Long senderAccountId, Long recipientAccountId, int amount) {
 
         Account senderAccount = accountRepository.findByIdWithPessimisticLock(senderAccountId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 계좌는 존재하지 않습니다."));
+                .orElseThrow(() -> new AccountNotFoundException("해당 계좌는 존재하지 않습니다."));
         Account recipientAccount = accountRepository.findByIdWithPessimisticLock(recipientAccountId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 계좌는 존재하지 않습니다."));
+                .orElseThrow(() -> new AccountNotFoundException("해당 계좌는 존재하지 않습니다."));
 
         if (senderAccount.getBalance() < amount) {
             throw new BadRequestException("잔액이 충분하지 않습니다.");
