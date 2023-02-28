@@ -3,6 +3,7 @@ package com.example.bankingserver.web;
 import com.example.bankingserver.domain.Friendship;
 import com.example.bankingserver.domain.Users;
 import com.example.bankingserver.exception.ForbiddenException;
+import com.example.bankingserver.exception.UsernameDuplicateException;
 import com.example.bankingserver.service.FriendshipService;
 import com.example.bankingserver.service.UserService;
 import com.example.bankingserver.web.dto.UserDto;
@@ -22,6 +23,12 @@ public class UserApiController {
 
     @PostMapping("/user")
     public Long join(@RequestBody UserDto userDto) {
+
+        boolean existUsername = userService.checkUsernameDuplicate(userDto.getUsername());
+
+        if (existUsername) {
+            throw new UsernameDuplicateException(userDto.getUsername() + "은/는 이미 존재합니다.");
+        }
 
         return userService.save(userDto);
     }

@@ -34,4 +34,9 @@ public class UserService {
     public Users findByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("해당 Username을 가진 사용자는 존재하지 않습니다."));
     }
+
+    public boolean checkUsernameDuplicate(String username) {
+
+        return userRepository.findByUsername(username).isPresent();
+    }
 }
