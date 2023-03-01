@@ -150,7 +150,7 @@ class AccountServiceTest {
     }
 
     @Test
-    public void 계좌조회() throws Exception {
+    public void 계좌조회_성공() throws Exception {
 
         // given
         Users user = new Users("user", "1234");
@@ -165,6 +165,17 @@ class AccountServiceTest {
         // then
         assertThat(balance).isEqualTo(20000);
 
+    }
+
+    @Test
+    public void 계좌조회_실패_계좌존재하지않는경우() throws Exception {
+
+        // given
+        Users user = new Users("user", "1234");
+        userRepository.save(user);
+
+        // when
+        assertThrows(AccountNotFoundException.class, () -> accountService.searchAccount(1L));
 
     }
 
