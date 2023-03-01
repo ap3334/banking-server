@@ -1,9 +1,6 @@
 package com.example.bankingserver.service;
 
-import com.example.bankingserver.domain.Account;
-import com.example.bankingserver.domain.AccountRepository;
-import com.example.bankingserver.domain.UserRepository;
-import com.example.bankingserver.domain.Users;
+import com.example.bankingserver.domain.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +22,9 @@ class AccountServiceTest {
     private AccountRepository accountRepository;
 
     @Autowired
+    private FriendshipRepository friendshipRepository;
+
+    @Autowired
     private AccountService accountService;
 
     @Test
@@ -34,6 +34,10 @@ class AccountServiceTest {
         Users userA = new Users("userA", "1234");
         Users userB = new Users("userB", "1234");
         userRepository.saveAll(List.of(userA, userB));
+
+        Friendship friendship = new Friendship(userA, userB);
+        friendshipRepository.save(friendship);
+
 
         Account accountA = new Account(userA, 20000);
         Account accountB = new Account(userB, 2000);
