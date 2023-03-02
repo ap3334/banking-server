@@ -51,10 +51,10 @@
 ---
 ## 문서
 
-### API 명세서
-### ERD
-### 테스트 문서
-### 프로젝트 설계 문서
+### [API 명세서](https://github.com/ap3334/banking-server/blob/master/docs/api.md)
+### [ERD](https://github.com/ap3334/banking-server/blob/master/docs/erd.md)
+### [테스트 문서](https://github.com/ap3334/banking-server/blob/master/docs/test.md)
+### [프로젝트 설계 문서](https://github.com/ap3334/banking-server/blob/master/docs/project.md)
 
 
 ---
