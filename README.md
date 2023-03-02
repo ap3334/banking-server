@@ -51,7 +51,7 @@
 ---
 ## 문서
 
-### [API 명세서](https://github.com/ap3334/banking-server/blob/master/docs/api.md)
+### [API 명세서](https://garden-ing.notion.site/API-cf012f4cb2fb43a49ff65f8550fb3171)
 ### [ERD](https://github.com/ap3334/banking-server/blob/master/docs/erd.md)
 ### [테스트 문서](https://github.com/ap3334/banking-server/blob/master/docs/test.md)
 ### [프로젝트 설계 문서](https://github.com/ap3334/banking-server/blob/master/docs/project.md)
