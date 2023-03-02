@@ -84,6 +84,30 @@ class UserApiControllerTest {
     }
 
     @Test
+    public void 회원가입_ApiTest_실패_중복Username가입() throws Exception {
+
+        // given
+        UserDto userDto = UserDto.builder()
+                .username("test")
+                .password("1234")
+                .build();
+
+        String url = "http://localhost:" + port + "/user";
+
+        // when
+        mvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(userDto)))
+                .andExpect(status().isOk());
+
+        mvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(userDto)))
+                .andExpect(status().isForbidden());
+
+    }
+
+    @Test
     public void 친구추가_ApiTest_성공() throws Exception {
 
         // given
