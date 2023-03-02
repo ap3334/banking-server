@@ -1,9 +1,6 @@
 package com.example.bankingserver.service;
 
-import com.example.bankingserver.domain.Account;
-import com.example.bankingserver.domain.AccountRepository;
-import com.example.bankingserver.domain.Transaction;
-import com.example.bankingserver.domain.TransactionRepository;
+import com.example.bankingserver.domain.*;
 import com.example.bankingserver.exception.AccountNotFoundException;
 import com.example.bankingserver.exception.BadRequestException;
 import com.example.bankingserver.exception.ForbiddenException;
@@ -22,6 +19,8 @@ public class AccountService {
 
     private final FriendshipService friendshipService;
 
+    private final AlarmService alarmService;
+
     public int transferAccount(Long senderAccountId, Long recipientAccountId, int amount) {
 
         Account senderAccount = accountRepository.findByIdWithPessimisticLock(senderAccountId)
@@ -29,7 +28,10 @@ public class AccountService {
         Account recipientAccount = accountRepository.findByIdWithPessimisticLock(recipientAccountId)
                 .orElseThrow(() -> new AccountNotFoundException("해당 계좌는 존재하지 않습니다."));
 
-        boolean isFriend = friendshipService.checkFriendship(senderAccount.getUser().getId(), recipientAccount.getUser().getId());
+        Users sender = senderAccount.getUser();
+        Users recipient = recipientAccount.getUser();
+
+        boolean isFriend = friendshipService.checkFriendship(sender.getId(), recipient.getId());
 
         if (!isFriend) {
             throw new ForbiddenException("친구관계가 아닌 사용자에게는 계좌이체를 할 수 없습니다.");
@@ -50,8 +52,19 @@ public class AccountService {
 
         transactionRepository.save(transaction);
 
+        sendAlarm(amount, sender, recipient);
+
         return senderAccount.getBalance();
 
+    }
+
+    private void sendAlarm(int amount, Users sender, Users recipient) {
+        try {
+            alarmService.callAlarm(sender.getId(), "출금, " + amount);
+            alarmService.callAlarm(recipient.getId(), "입금, " + amount);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Transactional(readOnly = true)
