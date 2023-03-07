@@ -49,10 +49,7 @@
 - 멀티쓰레드 환경에서 계좌 이체시 동시성 문제 해결
 
 ---
-## 문서
+## [WIKI](https://github.com/ap3334/banking-server/wiki)
+ERD, API 명세서, 기능 명세서 등 각종 문서 문서화
 
-### [API 명세서](https://garden-ing.notion.site/API-cf012f4cb2fb43a49ff65f8550fb3171)
-### [ERD](https://github.com/ap3334/banking-server/blob/master/docs/erd.md)
-### [테스트 문서](https://github.com/ap3334/banking-server/blob/master/docs/test.md)
-### [프로젝트 설계 문서](https://github.com/ap3334/banking-server/blob/master/docs/project.md)
 
