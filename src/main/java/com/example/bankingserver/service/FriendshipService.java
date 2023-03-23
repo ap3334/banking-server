@@ -3,7 +3,8 @@ package com.example.bankingserver.service;
 import com.example.bankingserver.domain.Friendship;
 import com.example.bankingserver.domain.FriendshipRepository;
 import com.example.bankingserver.domain.Users;
-import com.example.bankingserver.exception.BadRequestException;
+import com.example.bankingserver.exception.friendship.FriendshipExceptionType;
+import com.example.bankingserver.exception.global.BusinessLogicException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,10 +20,14 @@ public class FriendshipService {
 
     public Long addFriend(Users user, Users friend) {
 
+        if (user.getId().equals(friend.getId())) {
+            throw new BusinessLogicException(FriendshipExceptionType.NOT_ALLOWED_FRIENDSHIP);
+        }
+
         Optional<Friendship> friendshipOptional = friendshipRepository.findByUserIdAndFriendId(user.getId(), friend.getId());
 
         if (friendshipOptional.isPresent()) {
-            throw new BadRequestException("이미 친구 추가되어있는 사용자입니다.");
+            throw new BusinessLogicException(FriendshipExceptionType.EXIST_FRIENDSHIP);
         }
 
         Friendship friendship = Friendship.builder()
