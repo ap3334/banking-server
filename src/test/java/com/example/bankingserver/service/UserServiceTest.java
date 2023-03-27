@@ -1,8 +1,9 @@
 package com.example.bankingserver.service;
 
-import com.example.bankingserver.domain.Users;
-import com.example.bankingserver.domain.UserRepository;
-import com.example.bankingserver.web.dto.UserDto;
+import com.example.bankingserver.core.user.entity.Users;
+import com.example.bankingserver.core.user.repository.UserRepository;
+import com.example.bankingserver.core.user.service.UserService;
+import com.example.bankingserver.core.user.dto.request.UserJoinRequestDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,12 +34,12 @@ class UserServiceTest {
     public void 회원가입() throws Exception {
 
         // given
-        UserDto userDto = UserDto.builder()
+        UserJoinRequestDto userJoinRequestDto = UserJoinRequestDto.builder()
                 .username("test")
                 .password("{bcrypt}1234")
                 .build();
 
-        Users user = userDto.toEntity();
+        Users user = userJoinRequestDto.toEntity();
 
         Long fakeUserId = 1L;
         ReflectionTestUtils.setField(user, "id", fakeUserId);
@@ -53,7 +54,7 @@ class UserServiceTest {
                 .willReturn("encoderPassword");
 
         // when
-        Long newUserId = userService.save(userDto);
+        Long newUserId = userService.save(userJoinRequestDto);
 
         // then
         Users findUser = userRepository.findById(newUserId).get();

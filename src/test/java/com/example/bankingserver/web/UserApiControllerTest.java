@@ -1,11 +1,10 @@
 package com.example.bankingserver.web;
 
-import com.example.bankingserver.domain.Friendship;
-import com.example.bankingserver.domain.FriendshipRepository;
-import com.example.bankingserver.domain.UserRepository;
-import com.example.bankingserver.domain.Users;
-import com.example.bankingserver.web.dto.UserDto;
-import com.example.bankingserver.web.dto.UsernameDto;
+import com.example.bankingserver.core.friendship.entity.Friendship;
+import com.example.bankingserver.core.friendship.repository.FriendshipRepository;
+import com.example.bankingserver.core.user.repository.UserRepository;
+import com.example.bankingserver.core.user.entity.Users;
+import com.example.bankingserver.core.user.dto.request.UserJoinRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,7 +62,7 @@ class UserApiControllerTest {
     public void 회원가입_ApiTest() throws Exception {
 
         // given
-        UserDto userDto = UserDto.builder()
+        UserJoinRequestDto userJoinRequestDto = UserJoinRequestDto.builder()
                 .username("test")
                 .password("1234")
                 .build();
@@ -73,12 +72,12 @@ class UserApiControllerTest {
         // when
         mvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(userDto)))
+                        .content(new ObjectMapper().writeValueAsString(userJoinRequestDto)))
                 .andExpect(status().isOk());
 
         // then
         List<Users> all = userRepository.findAll();
-        assertThat(all.get(0).getUsername()).isEqualTo(userDto.getUsername());
+        assertThat(all.get(0).getUsername()).isEqualTo(userJoinRequestDto.getUsername());
 
     }
 
@@ -86,7 +85,7 @@ class UserApiControllerTest {
     public void 회원가입_ApiTest_실패_중복Username가입() throws Exception {
 
         // given
-        UserDto userDto = UserDto.builder()
+        UserJoinRequestDto userJoinRequestDto = UserJoinRequestDto.builder()
                 .username("test")
                 .password("1234")
                 .build();
@@ -96,13 +95,13 @@ class UserApiControllerTest {
         // when
         mvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(userDto)))
+                        .content(new ObjectMapper().writeValueAsString(userJoinRequestDto)))
                 .andExpect(status().isOk());
 
         mvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(userDto)))
-                .andExpect(status().isForbidden());
+                        .content(new ObjectMapper().writeValueAsString(userJoinRequestDto)))
+                .andExpect(status().isConflict());
 
     }
 
@@ -114,26 +113,22 @@ class UserApiControllerTest {
         Users user2 = userRepository.save(new Users("test2", "1234"));
         Users user3 = userRepository.save(new Users("test3", "1234"));
 
-        UsernameDto usernameDto2 = new UsernameDto(user2.getUsername());
-        UsernameDto usernameDto3 = new UsernameDto(user3.getUsername());
+        String url1 = "http://localhost:" + port + "/user/" + user1.getId() + "/friend/" + user2.getId();
+        String url2 = "http://localhost:" + port + "/user/" + user1.getId() + "/friend/" + user3.getId();
 
-        String url = "http://localhost:" + port + "/user/" + user1.getId() + "/friend";
 
         // when
-        mvc.perform(post(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(usernameDto2)))
+        mvc.perform(post(url1))
                 .andExpect(status().isOk());
 
-        mvc.perform(post(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(usernameDto3)))
+        mvc.perform(post(url2))
                 .andExpect(status().isOk());
 
         // then
         List<Friendship> friendshipList = userRepository.findById(user1.getId()).get().getFriendshipList();
         assertThat(friendshipList.size()).isEqualTo(2);
         assertThat(friendshipList.get(0).getFriend().getUsername()).isEqualTo("test2");
+        assertThat(friendshipList.get(1).getFriend().getUsername()).isEqualTo("test3");
 
     }
 
@@ -143,14 +138,10 @@ class UserApiControllerTest {
         // given
         Users user1 = userRepository.save(new Users("test1", "1234"));
 
-        UsernameDto usernameDto1 = new UsernameDto("test1");
-
-        String url = "http://localhost:" + port + "/user/" + user1.getId() + "/friend";
+        String url = "http://localhost:" + port + "/user/" + user1.getId() + "/friend/" + user1.getId();
 
         // when
-        mvc.perform(post(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(usernameDto1)))
+        mvc.perform(post(url))
                 .andExpect(status().isForbidden());
 
         // then
@@ -165,15 +156,11 @@ class UserApiControllerTest {
         // given
         Users user = userRepository.save(new Users("test1", "1234"));
 
-        UsernameDto usernameDto = new UsernameDto("test2");
-
-        String url = "http://localhost:" + port + "/user/" + user.getId() + "/friend";
+        String url = "http://localhost:" + port + "/user/" + user.getId() + "/friend/" + user.getId() + 1;
 
         // when
-        mvc.perform(post(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(usernameDto)))
-                .andExpect(status().is4xxClientError());
+        mvc.perform(post(url))
+                .andExpect(status().isNotFound());
 
         // then
         List<Friendship> friendshipList = userRepository.findById(user.getId()).get().getFriendshipList();
@@ -188,20 +175,14 @@ class UserApiControllerTest {
         Users user1 = userRepository.save(new Users("test1", "1234"));
         Users user2 = userRepository.save(new Users("test2", "1234"));
 
-        UsernameDto usernameDto = new UsernameDto(user2.getUsername());
-
-        String url = "http://localhost:" + port + "/user/" + user1.getId() + "/friend";
+        String url = "http://localhost:" + port + "/user/" + user1.getId() + "/friend/" + user2.getId();
 
         // when
-        mvc.perform(post(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(usernameDto)))
+        mvc.perform(post(url))
                 .andExpect(status().isOk());
 
-        mvc.perform(post(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(usernameDto)))
-                .andExpect(status().isBadRequest());
+        mvc.perform(post(url))
+                .andExpect(status().isConflict());
 
         // then
         List<Friendship> friendshipList = userRepository.findById(user1.getId()).get().getFriendshipList();
@@ -225,8 +206,8 @@ class UserApiControllerTest {
         // when, then
         mvc.perform(get(url))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].username").value("test2"))
-                .andExpect(jsonPath("$[1].username").value("test3"));
+                .andExpect(jsonPath("$.data[0].username").value("test2"))
+                .andExpect(jsonPath("$.data[1].username").value("test3"));
 
     }
 

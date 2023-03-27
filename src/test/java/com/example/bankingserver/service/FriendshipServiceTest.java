@@ -1,9 +1,9 @@
 package com.example.bankingserver.service;
 
-import com.example.bankingserver.domain.Friendship;
-import com.example.bankingserver.domain.FriendshipRepository;
-import com.example.bankingserver.domain.UserRepository;
-import com.example.bankingserver.domain.Users;
+import com.example.bankingserver.core.friendship.entity.Friendship;
+import com.example.bankingserver.core.friendship.repository.FriendshipRepository;
+import com.example.bankingserver.core.friendship.service.FriendshipService;
+import com.example.bankingserver.core.user.entity.Users;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +27,7 @@ class FriendshipServiceTest {
     private FriendshipRepository friendshipRepository;
 
     @Test
-    public void 친구추가() throws Exception {
+    public void 친구추가() {
 
         // given
         Users user1 = new Users("test1", "1234");
@@ -35,13 +35,18 @@ class FriendshipServiceTest {
 
         Friendship friendship = new Friendship(user1, user2);
 
-        Long fakeId = 1L;
-        ReflectionTestUtils.setField(friendship, "id", fakeId);
+        Long fakeFriendshipId = 1L;
+        ReflectionTestUtils.setField(friendship, "id", fakeFriendshipId);
+
+        Long fakeUser1Id = 1L;
+        Long fakeUser2Id = 2L;
+        ReflectionTestUtils.setField(user1, "id", fakeUser1Id);
+        ReflectionTestUtils.setField(user2, "id", fakeUser2Id);
 
         // mocking
         given(friendshipRepository.save(any()))
                 .willReturn(friendship);
-        given(friendshipRepository.findById(fakeId))
+        given(friendshipRepository.findById(fakeFriendshipId))
                 .willReturn(Optional.ofNullable(friendship));
 
         // when

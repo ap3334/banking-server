@@ -1,9 +1,15 @@
 package com.example.bankingserver.service;
 
-import com.example.bankingserver.domain.*;
-import com.example.bankingserver.exception.AccountNotFoundException;
-import com.example.bankingserver.exception.BadRequestException;
-import com.example.bankingserver.exception.ForbiddenException;
+import com.example.bankingserver.core.account.entity.Account;
+import com.example.bankingserver.core.account.exception.AccountExceptionType;
+import com.example.bankingserver.core.account.repository.AccountRepository;
+import com.example.bankingserver.core.account.service.AccountService;
+import com.example.bankingserver.core.friendship.entity.Friendship;
+import com.example.bankingserver.core.friendship.exception.FriendshipExceptionType;
+import com.example.bankingserver.core.friendship.repository.FriendshipRepository;
+import com.example.bankingserver.core.user.entity.Users;
+import com.example.bankingserver.core.user.repository.UserRepository;
+import com.example.bankingserver.global.exception.BusinessLogicException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,7 +20,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 class AccountServiceTest {
@@ -68,8 +73,16 @@ class AccountServiceTest {
         Friendship friendship = new Friendship(userA, userB);
         friendshipRepository.save(friendship);
 
+        Account accountA = new Account(userA, 20000);
+        Account accountB = new Account(userB, 2000);
+        accountRepository.saveAll(List.of(accountA, accountB));
+
         // when
-        assertThrows(AccountNotFoundException.class, () -> accountService.transferAccount(1L, 2L, 1000));
+        try {
+            accountService.transferAccount(accountA.getId(), accountB.getId() + 1, 1000);
+        } catch (BusinessLogicException e) {
+            assertThat(e.getBasicExceptionType()).isEqualTo(AccountExceptionType.NOT_FOUND_ACCOUNT);
+        }
 
     }
 
@@ -85,7 +98,12 @@ class AccountServiceTest {
         Account accountB = new Account(userB, 2000);
         accountRepository.saveAll(List.of(accountA, accountB));
 
-        assertThrows(ForbiddenException.class, () -> accountService.transferAccount(1L, 2L, 1000));
+        // when
+        try {
+            accountService.transferAccount(accountA.getId(), accountB.getId(), 1000);
+        } catch (BusinessLogicException e) {
+            assertThat(e.getBasicExceptionType()).isEqualTo(FriendshipExceptionType.NOT_EXIST_FRIENDSHIP);
+        }
 
     }
 
@@ -104,7 +122,11 @@ class AccountServiceTest {
         Account accountB = new Account(userB, 2000);
         accountRepository.saveAll(List.of(accountA, accountB));
 
-        assertThrows(BadRequestException.class, () -> accountService.transferAccount(1L, 2L, 1000));
+        try {
+            accountService.transferAccount(accountA.getId(), accountB.getId(), 1000);
+        } catch (BusinessLogicException e) {
+            assertThat(e.getBasicExceptionType()).isEqualTo(AccountExceptionType.NOT_ENOUGH_AMOUNT);
+        }
 
     }
 
@@ -170,12 +192,12 @@ class AccountServiceTest {
     @Test
     public void 계좌조회_실패_계좌존재하지않는경우() throws Exception {
 
-        // given
-        Users user = new Users("user", "1234");
-        userRepository.save(user);
-
         // when
-        assertThrows(AccountNotFoundException.class, () -> accountService.searchAccount(1L));
+        try {
+            accountService.searchAccount(1L);
+        } catch (BusinessLogicException e) {
+            assertThat(e.getBasicExceptionType()).isEqualTo(AccountExceptionType.NOT_FOUND_ACCOUNT);
+        }
 
     }
 
