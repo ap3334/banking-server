@@ -30,19 +30,17 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 
         String token = jwtProvider.resolveToken((HttpServletRequest) request);
 
-        log.info("token={}", token);
-
         if (token != null && jwtProvider.validateToken(token)) {
 
             String username = jwtProvider.getUsername(token);
 
-            log.info("username={}", username);
+            Users user = userService.findByUsername__cached(username);
 
-            Users user = userService.findByUsername(username);
+            if (userService.verifyWithWhiteList(user, token)) {
+                Authentication authentication = jwtProvider.getAuthentication(user);
 
-            Authentication authentication = jwtProvider.getAuthentication(user);
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
 
         chain.doFilter(request, response);

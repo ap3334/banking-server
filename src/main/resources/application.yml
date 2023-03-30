@@ -14,6 +14,13 @@ spring:
     hibernate:
       ddl-auto: create
 
+  cache:
+    type: redis
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
 
 custom:
   jwt:

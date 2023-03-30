@@ -9,9 +9,11 @@ import com.example.bankingserver.core.user.repository.UserRepository;
 import com.example.bankingserver.global.exception.BusinessLogicException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Transactional
@@ -25,7 +27,7 @@ public class UserService {
 
     private final JwtProvider jwtProvider;
 
-    public Long save(UserJoinRequestDto userJoinRequestDto) {
+    public Long signUp(UserJoinRequestDto userJoinRequestDto) {
 
         boolean isDuplicate = checkUsernameDuplicate(userJoinRequestDto.getUsername());
 
@@ -53,10 +55,33 @@ public class UserService {
         return userRepository.findByUsername(username).orElseThrow(() -> new BusinessLogicException(UserExceptionType.NOT_FOUND_USER));
     }
 
-    public String generationAccessToken(UserLoginRequestDto dto) {
+    public String generateAccessToken(UserLoginRequestDto dto) {
 
-        Users user = dto.toEntity();
+        Users user = userRepository.findByUsername(dto.getUsername()).orElseThrow(() ->
+                new BusinessLogicException(UserExceptionType.NOT_FOUND_USER));
 
-        return jwtProvider.generateAccessToken(user.getAccessTokenClaims(), 60 * 60 * 24 * 90);
+        String accessToken = user.getAccessToken();
+
+        if (!StringUtils.hasLength(accessToken)) {
+            accessToken = jwtProvider.generateAccessToken(user.getAccessTokenClaims(), 60 * 30 * 1000L); // 30분
+        }
+
+        user.changeAccessToken(accessToken);
+
+        System.out.println("accessToken = " + accessToken);
+
+        return accessToken;
+    }
+
+    public boolean verifyWithWhiteList(Users user, String token) {
+
+        return user.getAccessToken().equals(token);
+    }
+
+    @Cacheable(value = "user")
+    public Users findByUsername__cached(String username) {
+
+        return findByUsername(username);
+
     }
 }
