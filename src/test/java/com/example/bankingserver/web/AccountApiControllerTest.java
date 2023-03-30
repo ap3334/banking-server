@@ -1,7 +1,12 @@
 package com.example.bankingserver.web;
 
-import com.example.bankingserver.domain.*;
-import com.example.bankingserver.web.dto.TransferRequest;
+import com.example.bankingserver.core.account.entity.Account;
+import com.example.bankingserver.core.friendship.entity.Friendship;
+import com.example.bankingserver.core.user.entity.Users;
+import com.example.bankingserver.core.account.repository.AccountRepository;
+import com.example.bankingserver.core.friendship.repository.FriendshipRepository;
+import com.example.bankingserver.core.user.repository.UserRepository;
+import com.example.bankingserver.core.account.dto.request.AccountTransferRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,8 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Transactional
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -73,7 +77,7 @@ class AccountApiControllerTest {
         Account accountB = new Account(userB, 1000);
         accountRepository.saveAll(List.of(accountA, accountB));
 
-        TransferRequest request = TransferRequest.builder()
+        AccountTransferRequestDto request = AccountTransferRequestDto.builder()
                 .receiverAccountId(accountB.getId())
                 .amount(2000)
                 .build();
@@ -110,7 +114,7 @@ class AccountApiControllerTest {
         // when, then
         mvc.perform(get(url))
                 .andExpect(status().isOk())
-                .andExpect(content().string("20000"));
+                .andExpect(jsonPath("$.data").value(20000));
 
     }
 
