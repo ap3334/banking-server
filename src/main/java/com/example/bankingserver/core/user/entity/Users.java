@@ -6,9 +6,10 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -36,5 +37,22 @@ public class Users {
 
     public void passwordEncoding(String encodingPassword) {
         password = encodingPassword;
+    }
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("USER"));
+
+        return authorities;
+    }
+
+    public Map<String, Object> getAccessTokenClaims() {
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", getId());
+        map.put("username", getUsername());
+        map.put("authorities", getAuthorities());
+
+        return map;
     }
 }
