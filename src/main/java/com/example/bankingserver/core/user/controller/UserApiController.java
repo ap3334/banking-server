@@ -74,4 +74,13 @@ public class UserApiController {
         return new ResponseEntity<>(RsData.of("SUCCESS", "친구목록 조회 결과입니다.", friendList), HttpStatus.OK);
     }
 
+    @DeleteMapping("/user/{userId}/accessToken")
+    public ResponseEntity<RsData> deleteAccessToken(@PathVariable Long userId) {
+
+        Users user = userService.findById(userId);
+        userService.deleteAccessToken(user);
+
+        return new ResponseEntity<>(RsData.of("SUCCESS", "발급된 토큰을 삭제하였습니다. 재로그인을 시도해주세요."), HttpStatus.OK);
+    }
+
 }

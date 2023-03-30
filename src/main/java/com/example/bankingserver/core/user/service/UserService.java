@@ -9,6 +9,7 @@ import com.example.bankingserver.core.user.repository.UserRepository;
 import com.example.bankingserver.global.exception.BusinessLogicException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -78,10 +79,16 @@ public class UserService {
         return user.getAccessToken().equals(token);
     }
 
-    @Cacheable(value = "user")
+    @Cacheable(value = "user", key = "#username")
     public Users findByUsername__cached(String username) {
 
         return findByUsername(username);
 
+    }
+
+    @CacheEvict(value = "user", key = "#user.username")
+    public void deleteAccessToken(Users user) {
+
+        user.changeAccessToken("");
     }
 }
