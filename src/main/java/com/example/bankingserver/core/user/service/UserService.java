@@ -58,8 +58,7 @@ public class UserService {
 
     public String generateAccessToken(UserLoginRequestDto dto) {
 
-        Users user = userRepository.findByUsername(dto.getUsername()).orElseThrow(() ->
-                new BusinessLogicException(UserExceptionType.NOT_FOUND_USER));
+        Users user = findByUsername__cached(dto.getUsername());
 
         String accessToken = user.getAccessToken();
 
@@ -68,8 +67,6 @@ public class UserService {
         }
 
         user.changeAccessToken(accessToken);
-
-        System.out.println("accessToken = " + accessToken);
 
         return accessToken;
     }
