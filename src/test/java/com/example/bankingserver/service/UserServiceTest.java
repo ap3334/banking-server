@@ -54,7 +54,7 @@ class UserServiceTest {
                 .willReturn("encoderPassword");
 
         // when
-        Long newUserId = userService.save(userJoinRequestDto);
+        Long newUserId = userService.signUp(userJoinRequestDto);
 
         // then
         Users findUser = userRepository.findById(newUserId).get();
